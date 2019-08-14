@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Bing</title>
+
+    <link rel="stylesheet" type="text/css" href="ext-3.3.0/resources/css/ext-all.css">
+    <script type="text/javascript" src="ext-3.3.0/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="ext-3.3.0/ext-all.js"></script>
+    <style>
+        .backgroundImage {
+            background-image: url(./image/background.jpg)
+        }
+
+        #tab ul {
+            background: transparent;
+            border: none;
+        }
+
+        #tab div {
+            background: transparent;
+            border: none;
+        }
+
+    </style>
+    <script>
+        Ext.onReady(function () {
+
+            Ext.QuickTips.init();
+
+            Ext.ns('com.samson');
+            com.samson.SearchBar = function () {
+                this.init = function (cmp) {
+                    cmp.add({
+                        id: 'inner',
+                        xtype: 'textfield',
+                        title: '国内搜索',
+                        height: '32px'
+                    });
+                    cmp.add({
+                        id: 'outter',
+                        xtype: 'textfield',
+                        title: '国际搜索',
+                        height: '32px'
+                    });
+                }
+            }
+            Ext.preg('com.samson.SearchBar', com.samson.SearchBar);
+
+            var vp = new Ext.Viewport({
+                renderTo: Ext.getBody(),
+                xtype: 'viewport',
+                layout: 'absolute',
+                cls: 'backgroundImage',
+                items: [
+                    {
+                        xtype: 'box',
+                        autoEl: {
+                            tag: 'img',
+                            src: './image/bing.png'
+                        },
+                        x: 300,
+                        y: 115
+                    },
+                    {
+                        xtype: 'tabpanel',
+                        id:'tab',
+                        activeTab: 0,
+                        listeners: {
+                            tabchange: function (tp, p) {
+                                if (p.id == 'inner') {
+                                    Ext.getCmp("searchBtn").setTooltip('搜索网页');
+                                } else {
+                                    Ext.getCmp("searchBtn").setTooltip('Search the web');
+                                }
+                            }
+                        },
+                        plugins: ['com.samson.SearchBar'],
+                        x: 440,
+                        y: 100,
+                        anchor: '50%'
+                    }, {
+                        id: 'searchBtn',
+                        xtype: 'button',
+                        icon: './image/search.png',
+                        x: 960,
+                        y: 125,
+                        width: '53px',
+                        heigh: '20px',
+                        scale: 'large'
+                    }
+                ]
+            })
+            vp.render();
+        })
+    </script>
+</head>
+
+<body>
+
+</body>
+
+</html>
