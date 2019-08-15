@@ -2,6 +2,9 @@
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Bing</title>
 
     <link rel="stylesheet" type="text/css" href="ext-3.3.0/resources/css/ext-all.css">
@@ -21,11 +24,9 @@
             background: transparent;
             border: none;
         }
-
     </style>
     <script>
         Ext.onReady(function () {
-
             Ext.QuickTips.init();
 
             Ext.ns('com.samson');
@@ -64,7 +65,7 @@
                     },
                     {
                         xtype: 'tabpanel',
-                        id:'tab',
+                        id: 'tab',
                         activeTab: 0,
                         listeners: {
                             tabchange: function (tp, p) {
@@ -87,7 +88,7 @@
                         y: 125,
                         width: '53px',
                         heigh: '20px',
-                        scale: 'large'
+                        scale: 'large',
                     }
                 ]
             })

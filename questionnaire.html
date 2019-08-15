@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Questionnaire</title>
+
+    <link rel="stylesheet" type="text/css" href="ext-3.3.0/resources/css/ext-all.css">
+    <script type="text/javascript" src="ext-3.3.0/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="ext-3.3.0/ext-all.js"></script>
+
+    <script>
+
+        Ext.onReady(function () {
+            let currentItem = 1;
+
+            let store=new Ext.data.Store({
+                model: 'model1', 
+                autoLoad: false,
+                proxy: new Ext.data.ScriptTagProxy({
+                    url: 'http://localhost:9999/questionnaire',
+                    callbackParam:'callback',
+                    restful:true
+                }),
+                reader: new Ext.data.JsonReader({
+                    fields: [
+                        {
+                            name: 'name',
+                            type: 'string'
+                        }
+                    ]
+                })
+            })
+
+            let submitFunction = function () {
+                store.load(); 
+                Ext.MessageBox.alert('msg', 'congratulation');
+            }
+
+            let navHandler = function (direction) {
+                let mainPanel = Ext.getCmp('mainPanel');
+                let layout = mainPanel.layout;
+                if (direction >= 1) {
+                    layout.setActiveItem(currentItem++);
+                    if (currentItem > 1) {
+                        Ext.getCmp('prev').setDisabled(false);
+                    }
+                    if (currentItem == mainPanel.items.length) {
+                        Ext.getCmp('next').setDisabled(true);
+                        var answer = [{ xtype: 'label', html: '<H1 align="center",style="color:red"><font size="3" color="red">Your Answer</font><H1>' }];
+                        Q1.items.items.forEach(item => {
+                            if (item.xtype != 'label') {
+                                answer.push({ xtype: 'radio', boxLabel: item.boxLabel, disabled: true, checked: item.checked });
+                            } else {
+                                answer.push({ xtype: 'label', text: item.text });
+                            }
+                        });
+                        Q2.items.items.forEach(item => {
+                            if (item.xtype != 'label') {
+                                answer.push({ xtype: 'checkbox', boxLabel: item.boxLabel, disabled: true, checked: item.checked });
+                            } else {
+                                answer.push({ xtype: 'label', text: item.text });
+                            }
+                        });
+                        answer.push({ xtype: 'button', text: '提交', handler: submitFunction.createDelegate(this) });
+                        submitCard.removeAll();
+                        submitCard.add(answer);
+                        mainPanel.doLayout();
+                    }
+                } else {
+                    currentItem--;
+                    layout.setActiveItem(currentItem - 1);
+                    console.log(currentItem);
+                    if (currentItem == 1) {
+                        Ext.getCmp('prev').setDisabled(true);
+                    }
+                    if (currentItem < mainPanel.items.length) {
+                        Ext.getCmp('next').setDisabled(false);
+                    }
+                }
+            }
+
+            let Q1 = new Ext.Panel({
+                defaultType: 'radio',
+                layout: 'table',
+                frame: true,
+                layoutConfig: {
+                    columns: 1
+                },
+                autoHeight: true,
+                items: [
+                    { xtype: 'label', text: '1.番茄酱属于以下哪种垃圾？(单选)' },
+                    { boxLabel: '湿垃圾', name: 'tomato' },
+                    { boxLabel: '干垃圾', name: 'tomato' },
+                    { boxLabel: '有害垃圾', name: 'tomato' },
+                    { boxLabel: '可回收物', name: 'tomato' }
+                ]
+            })
+
+            let Q2 = new Ext.Panel({
+                defaultType: 'checkbox',
+                layout: 'table',
+                frame: true,
+                layoutConfig: {
+                    columns: 1
+                },
+                autoHeight: true,
+                items: [
+                    { xtype: 'label', text: '2.王大叔出门遛狗后，哪些是正确处理狗粑粑的方法？(多选)' },
+                    { boxLabel: '把粑粑用废纸包好带回家冲掉' },
+                    { boxLabel: '受污染的报纸按有害的垃圾处理' },
+                    { boxLabel: '没受污染的报纸可按回收垃圾处理' },
+                    { boxLabel: '受污染的报纸浸水后按湿垃圾处理' }
+                ]
+            })
+
+            let submitCard = new Ext.Panel({
+                id: 'submitCard',
+                layout: 'table',
+                frame: true,
+                layoutConfig: {
+                    columns: 1
+                },
+                autoHeight: true,
+                items: []
+            })
+
+            let panel = new Ext.Panel({
+                id: 'mainPanel',
+                renderTo: 'main',
+                title: 'Questionnaire',
+                layout: 'card',
+                pack: 'center',
+                width: 400,
+                activeItem: 0,
+                items: [Q1, Q2, submitCard],
+                bbar: [
+                    {
+                        id: 'prev',
+                        text: '上一道',
+                        handler: navHandler.createDelegate(this, [-1]),
+                        disabled: true
+                    },
+                    '->',
+                    {
+                        id: 'next',
+                        text: '下一道',
+                        handler: navHandler.createDelegate(this, [1])
+                    }
+                ],
+            })
+        })
+    </script>
+</head>
+
+<body>
+    <div id='main' align='center'></div>
+</body>
+
+</html>
