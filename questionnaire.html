@@ -16,13 +16,12 @@
         Ext.onReady(function () {
             let currentItem = 1;
 
-            let store=new Ext.data.Store({
-                model: 'model1', 
+            let store = new Ext.data.Store({
                 autoLoad: false,
                 proxy: new Ext.data.ScriptTagProxy({
                     url: 'http://localhost:9999/questionnaire',
-                    callbackParam:'callback',
-                    restful:true
+                    callbackParam: 'callback',
+                    restful: true
                 }),
                 reader: new Ext.data.JsonReader({
                     fields: [
@@ -35,7 +34,17 @@
             })
 
             let submitFunction = function () {
-                store.load(); 
+                store.load({
+                    callback: function (r, options, success) {
+                        if (success) {
+                            Ext.MessageBox.alert('提示', '请求后台成功!', null);
+                        }
+                        else {
+                            Ext.MessageBox.alert('提示', '请求后台失败!', null);
+                        }
+
+                    }
+                });
                 Ext.MessageBox.alert('msg', 'congratulation');
             }
 
