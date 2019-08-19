@@ -1,0 +1,1 @@
+drop procuratorate_db

@@ -18,6 +18,16 @@
     <script>
         Ext.onReady(function () {
 
+            let tid;
+            let text;
+            let leaf;
+            let parentId;
+
+            let jsonReader = new Ext.data.JsonReader(
+                { root: 'Data', totalProperty: 'RecordCount' },
+                []
+            );
+
             let menu = new Ext.menu.Menu({
                 items: [{
                     id: 'add',
@@ -59,12 +69,36 @@
                     Ext.MessageBox.alert('提示', '名称不能为空！');
                     return;
                 }
-                let id = selectedNode.text + name;
+                let id = selectedNode.id + name;
                 let newNode = new Ext.tree.TreeNode({ text: name, id: id });
                 selectedNode.appendChild(newNode);
                 schoolTree.expandAll();
                 Ext.getCmp('schoolTree').getSelectionModel().select(newNode);
                 Ext.getCmp('name').reset();
+                tid=id;
+                text=name;
+                leaf="0";
+                parentId=selectedNode.id;
+                let store = new Ext.data.Store({
+                autoLoad: false,
+                proxy: new Ext.data.ScriptTagProxy({
+                    url: 'http://localhost:9999/backend/nodes?'+"tid="+tid+"&text="+text+"&leaf="+leaf+"&parentId="+parentId,
+                    callbackParam: 'callback',
+                    restful: true
+                }),
+                reader:jsonReader
+            })
+                store.load({
+                    callback: function (data, options, success) {
+                        if (success) {
+                            Ext.MessageBox.alert('提示', "添加到后台成功", null);
+                        }
+                        else {
+                            Ext.MessageBox.alert('提示', '请求后台失败!', null);
+                        }
+
+                    }
+                });
             }
 
             let addBar = [
@@ -113,8 +147,8 @@
                 }
             })
 
-            let school = new Ext.tree.TreeNode({ text: '学校', expanded: true })
-            let cls = new Ext.tree.TreeNode({ text: '1班' })
+            let school = new Ext.tree.TreeNode({ id:"school",text: '学校', expanded: true })
+            let cls = new Ext.tree.TreeNode({ id:'firstClass',text: '1班' })
             schoolTree.setRootNode(school);
             school.appendChild(cls);
 
