@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Blog</title>
+
+    <link rel="stylesheet" type="text/css" href="ext-3.3.0/resources/css/ext-all.css">
+    <script type="text/javascript" src="ext-3.3.0/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="ext-3.3.0/ext-all.js"></script>
+
+    <script>
+        Ext.onReady(function () {
+
+            let closeTableWin = function (type) {
+                if (type.text == 'Ok') {
+                    let columns = Ext.getCmp('columns').getValue();
+                    let rows = Ext.getCmp('rows').getValue();
+                    let data = {
+                        options: []
+                    }
+                    for (let i = 0; i < rows; i++) {
+                        let column = [];
+                        for (let j = 0; j < columns; j++) {
+                            column.push({text: '&nbsp;&nbsp;&nbsp;' });
+                        }
+                        data.options.push({text: '&nbsp;&nbsp;&nbsp;&nbsp;',cols:column})
+                    }
+                    let xTemplate = new Ext.XTemplate(
+                        '<table border=1>',
+                        '<tpl for="options"><tr><tpl for="cols"><td>{text}</td></tpl></tr></tpl>',
+                        '</table>'
+                    )
+                    
+                    xTemplate.append('comment',data);
+                }
+                tableWin.hide();
+            }
+
+            let tablePanel = new Ext.form.FormPanel({
+                buttonAlign: 'center',
+                labelAlign: 'right',
+                items: [
+                    { xtype: 'textfield', fieldLabel: 'columns', id: 'columns' },
+                    { xtype: 'textfield', fieldLabel: 'rows', id: 'rows' }
+                ],
+                buttons: [
+                    { xtype: 'button', text: 'Ok', handler: closeTableWin.createDelegate(this) },
+                    { xtype: 'button', text: 'Cancel', handler: closeTableWin.createDelegate(this) }
+                ]
+            })
+
+            let tableWin = new Ext.Window({
+                title: 'Insert Table?',
+                el: 'winTable',
+                resizable: false,
+                items: [tablePanel]
+            })
+
+            let commentField = new Ext.form.TextArea({
+                renderTo: 'comment',
+                id: 'commentField',
+                width: 800,
+                height: 500,
+                emptyText: 'please input your comment',
+                listeners: {
+                    blur: function (item) {
+                        if (item.getValue().trim()) {
+                            Ext.getCmp('replyBtn').setDisabled(false);
+                        } else {
+                            Ext.getCmp('replyBtn').setDisabled(true);
+                        }
+                    }
+                }
+            })
+
+            let updateProgress = function (time) {
+                Ext.MessageBox.progress("请等待", "正在提交...");
+                return function () {
+                    if (time == 3) {
+                        Ext.MessageBox.hide();
+                        Ext.MessageBox.alert('success', 'commit successfully');
+                    } else {
+                        Ext.MessageBox.updateProgress(time / 3, '还剩' + (3 - time) + '秒');
+                    }
+                }
+            }
+
+            let commitHandler = function () {
+                for (let i = 0; i <= 3; i++) {
+                    setTimeout(updateProgress(i), i * 1000);
+                }
+            }
+
+            let replyButton = new Ext.Button({
+                renderTo: 'reply',
+                id: 'replyBtn',
+                text: 'reply',
+                width: 100,
+                disabled: true,
+                handler: commitHandler.createDelegate()
+            })
+
+
+            let xTemplate = new Ext.XTemplate(
+                '<table border=1>',
+                '<tr><td></td></tr>',
+                '</table>'
+            )
+
+            let editMenu = new Ext.menu.Menu({
+                items: [
+                    {
+                        text: 'Reset',
+                        listeners: {
+                            click: function () {
+                                Ext.getCmp('commentField').reset();
+                            }
+                        }
+                    }
+                ],
+                listeners: {
+                    itemclick: function (item) {
+                    }
+                }
+            })
+
+            let insertMenu = new Ext.menu.Menu({
+                items: [
+                    { text: 'Table' }
+                ],
+                listeners: {
+                    itemclick: function (item) {
+                        if (item.text == 'Table') {
+                            tableWin.show();
+                        }
+                    }
+                }
+            })
+
+            let contextMenu = new Ext.menu.Menu({
+                items: [
+                    { text: 'Edit', menu: editMenu },
+                    { text: 'Insert', menu: insertMenu }
+                ]
+            })
+
+            let toolBar = new Ext.Toolbar({
+                renderTo: 'toolbar',
+                width: '800',
+                items: [
+                    { text: 'Edit', menu: editMenu },
+                    { text: 'Insert', menu: insertMenu }
+                ]
+            })
+
+            Ext.get(document).on('contextmenu', function (e) {
+                e.preventDefault();
+                contextMenu.showAt(e.getXY());
+            })
+        })
+    </script>
+
+</head>
+
+<body>
+    <div id='toolbar' align='center'></div>
+    <div id='comment' align='center'></div>
+    <div id='reply' align='center'></div>
+    <div id='winTable'></div>
+</body>
+
+</html>
