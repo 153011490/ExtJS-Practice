@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <link rel="stylesheet" type="text/css" href="ext-3.3.0/resources/css/ext-all.css">
+    <script type="text/javascript" src="ext-3.3.0/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="ext-3.3.0/ext-all.js"></script>
+    <script type="text/javascript" src="ext-3.3.0/PagingMemoryProxy.js"></script>
+
+    <script>
+        Ext.onReady(function () {
+
+            let sm = new Ext.grid.CheckboxSelectionModel({ handleMouseDown: Ext.emptyFn });
+
+            let cm = new Ext.grid.ColumnModel([
+                new Ext.grid.RowNumberer(),
+                sm,
+                {
+                    header: 'name',
+                    dataIndex: 'name',
+                    sortable: true,
+                    editor: new Ext.grid.GridEditor(
+                        new Ext.form.TextField({
+                            allowBlank: false
+                        })
+                    )
+                },
+                {
+                    header: 'class',
+                    dataIndex: 'class',
+                    sortable: true,
+                    editor: new Ext.grid.GridEditor(
+                        new Ext.form.TextField({
+                            allowBlank: false
+                        })
+                    )
+                },
+                {
+                    header: 'sex',
+                    dataIndex: 'sex',
+                    editor: new Ext.grid.GridEditor(
+                        new Ext.form.TextField({
+                            allowBlank: false
+                        })
+                    )
+                },
+                {
+                    header: 'age',
+                    dataIndex: 'age',
+                    editor: new Ext.grid.GridEditor(
+                        new Ext.form.TextField({
+                            allowBlank: false
+                        })
+                    )
+                },
+                {
+                    header: 'birthday',
+                    dataIndex: 'birthday',
+                    editor: new Ext.grid.GridEditor(
+                        new Ext.form.TextField({
+                            allowBlank: false
+                        })
+                    )
+                },
+                {
+                    header: 'avatar',
+                    dataIndex: 'avatar',
+                    renderer: function (value) {
+                        return value == 'b' ? '👦' : '👧';
+                    },
+                    editor: new Ext.grid.GridEditor(
+                        new Ext.form.TextField({
+                            allowBlank: false
+                        })
+                    ),
+                }
+            ])
+
+            let data = [
+                ['Amy', 'class A', 'female', 18, '2001-01-01', 'g'],
+                ['Jhon', 'class A', 'male', 17, '2002-01-01', 'b'],
+                ['Mike', 'class B', 'male', 18, '2001-08-01', 'b'],
+                ['Sarah', 'class C', 'female', 18, '2001-09-01', 'g'],
+                ['Samson', 'class D', 'male', 18, '2001-10-01', 'b'],
+                ['Berio', 'class D', 'male', 18, '2001-11-01', 'b']
+            ]
+
+            let store = new Ext.data.GroupingStore({
+                id: 'store',
+                proxy: new Ext.data.PagingMemoryProxy(data),
+                reader: new Ext.data.ArrayReader({}, [
+                    { name: 'name' },
+                    { name: 'class' },
+                    { name: 'sex' },
+                    { name: 'age' },
+                    { name: 'birthday',type: 'date', renderer: Ext.util.Format.dateRenderer('Y-m-d')},
+                    { name: 'avatar' }
+                ]),
+                groupField: 'class',
+                sortInfo: { field: 'sex', direction: 'ASC' }
+            })
+
+            store.load({ params: { start: 0, limit: 3 } });
+
+            let grid = new Ext.grid.EditorGridPanel({
+                store: store,
+                autoHeight: true,
+                autoWidth: true,
+                cm: cm,
+                sm: sm,
+                view: new Ext.grid.GroupingView(),
+                bbar: new Ext.PagingToolbar({
+                    pageSize: 3,
+                    store: store,
+                    displayInfo: true,
+                    displayMsg: '显示第 {0} 条到 {1} 条记录，一共 {2} 条',
+                    emptyMsg: "没有记录"
+                })
+            })
+
+            let contextmenu = new Ext.menu.Menu({
+                id: 'contextMenu',
+                items: [{
+                    text: 'Up',
+                    handler: function () {
+                        let selections = grid.getSelectionModel().getSelections();
+                        let index = store.indexOf(selections[0]);
+                        if (index == 0) return false;
+                        store.remove(selections[index]);
+                        store.insert(index - 1, selections[0]);
+                        grid.view.refresh();
+                    }
+                }, {
+                    text: 'Down',
+                    handler: function () {
+                        let selections = grid.getSelectionModel().getSelections();
+                        let index = store.indexOf(selections[0]);
+                        if (index == (store.getCount() - 1)) return false;
+                        store.remove(selections[0]);
+                        store.insert(index + 1, selections[0]);
+                        grid.view.refresh();
+                    }
+                }, {
+                    text: 'First',
+                    handler: function () {
+                        let selections = grid.getSelectionModel().getSelections();
+                        store.remove(selections);
+                        store.insert(0, selections);
+                        grid.view.refresh();
+                    }
+                }, {
+                    text: 'Last',
+                    handler: function () {
+                        let selections = grid.getSelectionModel().getSelections();
+                        store.remove(selections);
+                        store.insert(store.getCount(), selections);
+                        grid.view.refresh();
+                    }
+                }]
+            });
+
+            grid.on("rowcontextmenu", function (grid, rowIndex, e) {
+                e.preventDefault();
+                grid.getSelectionModel().selectRow(rowIndex);
+                contextmenu.showAt(e.getXY());
+            })
+
+            let StudentRecord = new Ext.data.Record.create([
+                { name: 'name' },
+                { name: 'class' },
+                { name: 'sex' },
+                { name: 'age' },
+                { name: 'birthday' },
+                { name: 'avatar' }
+            ])
+
+            let toolBar = new Ext.Toolbar({
+                width: '800',
+                items: [
+                    {
+                        text: 'add',
+                        handler: () => {
+                            let selections = grid.getSelectionModel().getSelections();
+                            let student = new StudentRecord({
+                                name: '',
+                                class: '',
+                                sex: '',
+                                age: '',
+                                birthday: '',
+                                avatar: ''
+                            });
+                            if (selections.length >= 1) {
+                                Ext.each(selections, (value)=>{
+                                    store.insert(store.indexOf(value), student);
+                                })
+                            }else{
+                                store.insert(0, student);
+                            }
+                            grid.view.refresh();
+                        }
+                    },
+                    '-',
+                    {
+                        text: 'delete',
+                        handler: () => {
+                            let selections = grid.getSelectionModel().getSelections();
+                            selections.forEach(item => {
+                                store.remove(store.getById(item.id));
+                                grid.view.refresh();
+                            });
+                        }
+                    }
+                ]
+            })
+
+            let win = new Ext.Window({
+                title: 'Student Management',
+                height: 600,
+                items: [toolBar, grid]
+            })
+            win.show();
+        })
+    </script>
+</head>
+
+<body>
+</body>
+
+</html>
